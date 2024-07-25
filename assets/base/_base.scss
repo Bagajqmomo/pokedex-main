@@ -1,0 +1,57 @@
+@use "../fowards.scss" as *;
+
+* {
+  box-sizing: border-box;
+  line-height: normal;
+  margin: 0;
+  padding: 0;
+  scroll-behavior: smooth;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+ol,
+ul {
+  padding-left: 2rem;
+}
+
+::after,
+::before {
+  margin: 0;
+  box-sizing: inherit;
+  padding: 0;
+}
+
+body {
+  font-family: "Montserrat", sans-serif;
+  background-color: $primary-bg-color;
+  color: #fff;
+}
+
+html,
+body {
+  width: 100%;
+}
+
+a {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+button {
+  cursor: pointer;
+  outline: none;
+  border: none;
+}
+
+.vfm-parent {
+  width: 100%;
+  gap: 24px;
+
+  > span:last-child {
+    margin-right: 24px;
+  }
+}

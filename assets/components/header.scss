@@ -1,0 +1,58 @@
+@use "../fowards.scss" as *;
+
+.header {
+  width: 100%;
+  @include flex(center, center);
+  gap: px_rem(80);
+  flex-direction: column;
+  background: url(/assets/image/bg-balls.svg),
+    radial-gradient(
+      92.5% 92.5% at 55.1% 110.7%,
+      #ab0001 0%,
+      rgba(171, 0, 1, 0) 100%
+    ),
+    linear-gradient(180deg, #bc4e41, #961231);
+  background-size: 101%;
+  background-position: bottom, 50%;
+  background-repeat: no-repeat;
+  padding-block: 80px 300px;
+
+  &__logo {
+    max-width: 200px;
+  }
+
+  &__slogan {
+    @include flex(center, center);
+    flex-direction: column;
+    gap: px_rem(24);
+  }
+
+  &__title {
+    font-size: px_rem(64);
+    font-weight: 700;
+  }
+
+  &__desc {
+    font-size: px_rem(18);
+    line-height: 150%;
+  }
+
+  &__mascot {
+    @include flex(space-between, center);
+    width: 100%;
+    background: linear-gradient(
+      284.15deg,
+      #eff3f6 15.54%,
+      rgba(239, 243, 246, 0) 86.34%
+    );
+    height: 200px;
+    position: relative;
+
+    > img {
+      position: absolute;
+      left: 50%;
+      bottom: -50%;
+      transform: translateX(-50%);
+    }
+  }
+}

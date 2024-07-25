@@ -1,0 +1,13 @@
+$browser-content: 16; //base
+
+@function px_em($px, $context: $browser-content) {
+	@return #{calc($px/$context)}em;
+}
+
+@function px_rem($px, $context: $browser-content) {
+	@return #{calc($px/$context)}rem;
+}
+
+@function calc_line_height($px, $line-height: 4) {
+	@return #{$px + $line-height}px;
+}

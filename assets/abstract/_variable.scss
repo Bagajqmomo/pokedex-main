@@ -1,0 +1,21 @@
+$base_url : '../../../images';
+
+$grid-breakpoints-up: (
+    xs: 0,
+    sm: 577px,
+    md: 769px,
+    lg: 993px,
+    xl: 1201px,
+    xxl: 1441px,
+    sp:1661px
+);
+
+$grid-breakpoints-down: (
+    xs: 0,
+    sm: 576px,
+    md: 768px,
+    lg: 992px,
+    xl: 1200px,
+    xxl: 1440px,
+    sp:1660px
+);
