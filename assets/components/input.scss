@@ -1,0 +1,9 @@
+@use "../fowards.scss" as *;
+
+.input {
+  &__wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: px_rem(8);
+  }
+}

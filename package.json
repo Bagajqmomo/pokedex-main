@@ -12,6 +12,7 @@
   "dependencies": {
     "nuxt": "^3.12.3",
     "radix-vue": "^1.9.2",
+    "swiper": "^11.1.9",
     "vue": "latest"
   },
   "devDependencies": {

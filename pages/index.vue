@@ -1,5 +1,20 @@
 <template>
   <div>
+    <client-only>
+      <swiper-container
+        :spaceBetween="30"
+        :pagination="{
+          clickable: true,
+        }"
+        class="mySwiper"
+      >
+        <swiper-slide v-for="(image, index) in elementImages" :key="index">
+          <img :src="image" :alt="'Slide ' + (index + 1)" />
+        </swiper-slide>
+      </swiper-container>
+    </client-only>
+  </div>
+  <div>
     <h1>Pokemon Searcher</h1>
     <input
       v-model="searchTerm"
@@ -31,10 +46,34 @@
 </template>
 
 <script setup>
+import { register } from "swiper/element/bundle";
 const pokemonData = ref(null);
 const searchTerm = ref("");
 const loading = ref(false);
 const error = ref(null);
+
+register(); //swiper
+
+const elementImages = [
+  "/images/element/normal.svg",
+  "/images/element/fighting.svg",
+  "/images/element/flying.svg",
+  "/images/element/poison.svg",
+  "/images/element/ground.svg",
+  "/images/element/rock.svg",
+  "/images/element/bug.svg",
+  "/images/element/ghost.svg",
+  "/images/element/steel.svg",
+  "/images/element/fire.svg",
+  "/images/element/water.svg",
+  "/images/element/grass.svg",
+  "/images/element/electric.svg",
+  "/images/element/psychic.svg",
+  "/images/element/ice.svg",
+  "/images/element/dragon.svg",
+  "/images/element/dark.svg",
+  "/images/element/fairy.svg",
+];
 
 const fetchPokemon = async (pokemonName) => {
   loading.value = true;
