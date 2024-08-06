@@ -1,46 +1,61 @@
 <template>
-  <div>
-    <client-only>
-      <swiper-container
-        :spaceBetween="30"
-        :pagination="{
-          clickable: true,
-        }"
-        class="mySwiper"
-      >
-        <swiper-slide v-for="(image, index) in elementImages" :key="index">
-          <img :src="image" :alt="'Slide ' + (index + 1)" />
-        </swiper-slide>
-      </swiper-container>
-    </client-only>
-  </div>
-  <div>
-    <h1>Pokemon Searcher</h1>
-    <input
-      v-model="searchTerm"
-      @keyup.enter="searchPokemon"
-      placeholder="Enter Pokemon name"
-    />
-    <button @click="searchPokemon">Search</button>
-
-    <div v-if="loading">Loading...</div>
-
-    <div v-else-if="error">{{ error }}</div>
-
-    <div v-else-if="pokemonData">
-      <h2>{{ pokemonData.name }}</h2>
-      <img :src="pokemonData.sprites.front_default" :alt="pokemonData.name" />
-      <p>Height: {{ pokemonData.height }} dm</p>
-      <p>Weight: {{ pokemonData.weight }} hg</p>
-      <h3>Abilities:</h3>
-      <ul>
-        <li
-          v-for="ability in pokemonData.abilities"
-          :key="ability.ability.name"
+  <div class="container">
+    <div class="pokedex__header">
+      <client-only>
+        <swiper-container
+          class="element__container"
+          :slidesPerView="'auto'"
+          :spaceBetween="16"
+          :autoplay="{
+            delay: 4000,
+          }"
         >
-          {{ ability.ability.name }}
-        </li>
-      </ul>
+          <swiper-slide
+            class="element__slide"
+            v-for="(image, index) in elementImages"
+            :key="index"
+          >
+            <img :src="image" :alt="'Slide ' + (index + 1)" />
+          </swiper-slide>
+        </swiper-container>
+      </client-only>
+      <div class="input__wrapper">
+        <input
+          v-model="searchTerm"
+          @keyup.enter="searchPokemon"
+          placeholder="Enter Pokemon name"
+        />
+        <img src="/assets/image/search.svg" />
+      </div>
+    </div>
+    <div>
+      <h1>Pokemon Searcher</h1>
+      <button @click="searchPokemon">Search</button>
+
+      <div v-if="loading">Loading...</div>
+
+      <div v-else-if="error">{{ error }}</div>
+
+      <div v-else-if="pokemonData">
+        <div class="pokedex__card">
+          <h2>{{ pokemonData.name }}</h2>
+          <img
+            :src="pokemonData.sprites.front_default"
+            :alt="pokemonData.name"
+          />
+          <p>Height: {{ pokemonData.height }} dm</p>
+          <p>Weight: {{ pokemonData.weight }} hg</p>
+          <h3>Abilities:</h3>
+          <ul>
+            <li
+              v-for="ability in pokemonData.abilities"
+              :key="ability.ability.name"
+            >
+              {{ ability.ability.name }}
+            </li>
+          </ul>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -95,6 +110,8 @@ const fetchPokemon = async (pokemonName) => {
 };
 
 const searchPokemon = () => {
+  console.log("byebye");
+  console.log(searchTerm.value);
   if (searchTerm.value.trim()) {
     fetchPokemon(searchTerm.value);
   }

@@ -1,22 +1,14 @@
 @use "../fowards.scss" as *;
 
-.input {
-  &__wrapper {
-    @include flex(space-between, center);
-    gap: px_rem(8);
+.element {
+  &__container {
     box-shadow: 0 0 0 1px transparent, 0 2px 4px transparent,
       0 12px 24px transparent;
+    cursor: pointer;
+    height: 100%;
+    z-index: 1;
     border-radius: px_rem(12);
     padding: px_rem(8) px_rem(16);
-    position: relative;
-    height: px_rem(52);
-    cursor: pointer;
-
-    &:hover {
-      background: #111;
-      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.03), 0 2px 4px rgba(0, 0, 0, 0.05),
-        0 12px 24px rgba(0, 0, 0, 0.05);
-    }
 
     &::before {
       content: "";
@@ -34,18 +26,25 @@
       opacity: 0.5;
       pointer-events: none;
     }
+  }
 
-    input {
-      background: transparent;
-      outline: none;
-      border: none;
-      font-size: px_rem(16);
-      color: #fff;
-    }
+  &__slide {
+    max-width: 32px;
+    cursor: pointer;
+  }
+}
 
-    img {
-      width: px_rem(16);
-      height: px_rem(16);
+.pokedex {
+  &__header {
+    padding-top: px_rem(32);
+    @include flex(space-between, center);
+    gap: px_rem(32);
+    margin-bottom: px_rem(32);
+    > * {
+      flex: 1;
     }
+  }
+
+  &__card {
   }
 }
