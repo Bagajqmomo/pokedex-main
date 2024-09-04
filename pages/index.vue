@@ -79,6 +79,10 @@
 </template>
 
 <script setup>
+useHead({
+  title: "Pokédex - Gotta Catch 'Em All",
+});
+
 import { ref, onMounted } from "vue";
 import { register } from "swiper/element/bundle";
 
