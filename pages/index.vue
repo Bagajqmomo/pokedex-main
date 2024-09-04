@@ -91,7 +91,7 @@ const searchTerm = ref("");
 const loading = ref(false);
 const error = ref(null);
 const currentIndex = ref(1); // Start with Pokémon index 1
-const limit = 9; // Number of Pokémon to show per page
+const limit = 15; // Number of Pokémon to show per page
 const offset = ref(0); // Pagination offset
 
 register(); //swiper

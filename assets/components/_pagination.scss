@@ -16,6 +16,8 @@
     position: relative;
     background: transparent;
     color: #fff;
+    height: px_rem(48);
+    width: px_rem(48);
 
     &::before {
       content: "";
