@@ -1,22 +1,21 @@
 @use "../fowards.scss" as *;
 
-.input {
-  &__wrapper {
-    @include flex(space-between, center);
-    gap: px_rem(8);
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: px_rem(48);
+  gap: px_rem(48);
+
+  button {
+    outline: none;
+    border: none;
     box-shadow: 0 0 0 1px transparent, 0 2px 4px transparent,
       0 12px 24px transparent;
-    border-radius: px_rem(12);
+    border-radius: px_rem(8);
     padding: px_rem(8) px_rem(16);
     position: relative;
-    height: px_rem(52);
-    cursor: pointer;
-
-    &:hover {
-      background: #111;
-      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.03), 0 2px 4px rgba(0, 0, 0, 0.05),
-        0 12px 24px rgba(0, 0, 0, 0.05);
-    }
+    background: transparent;
+    color: #fff;
 
     &::before {
       content: "";
@@ -33,19 +32,6 @@
       mask-composite: exclude;
       opacity: 0.5;
       pointer-events: none;
-    }
-
-    input {
-      background: transparent;
-      outline: none;
-      border: none;
-      font-size: px_rem(16);
-      color: #fff;
-    }
-
-    img {
-      width: px_rem(16);
-      height: px_rem(16);
     }
   }
 }
