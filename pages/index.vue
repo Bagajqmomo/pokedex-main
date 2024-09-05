@@ -30,11 +30,11 @@
     </div>
 
     <div class="pokedex__content">
-      <div v-if="loading">Loading...</div>
+      <Loader v-if="loading" />
       <div v-else-if="error">{{ error }}</div>
       <div class="pokedex__container" v-else>
         <div
-          v-for="pokemon in pokemonList"
+          v-for="pokemon in paginatedPokemonList"
           :key="pokemon.id"
           class="pokedex__card"
           :style="{
@@ -83,16 +83,16 @@ useHead({
   title: "Pokédex - Gotta Catch 'Em All",
 });
 
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { register } from "swiper/element/bundle";
 
-const pokemonList = ref([]);
+const allPokemonList = ref([]); // Store all Pokémon names and URLs
+const pokemonList = ref([]); // Store the current page's Pokémon details
 const searchTerm = ref("");
 const loading = ref(false);
 const error = ref(null);
 const currentIndex = ref(1); // Start with Pokémon index 1
 const limit = 15; // Number of Pokémon to show per page
-const offset = ref(0); // Pagination offset
 
 register(); //swiper
 
@@ -117,23 +117,19 @@ const elementImages = [
   "/images/element/fairy.svg",
 ];
 
-const fetchPokemonList = async () => {
+// Fetch basic info for all Pokémon
+const fetchAllPokemon = async () => {
   loading.value = true;
   error.value = null;
-  pokemonList.value = [];
   try {
-    const offsetValue = (currentIndex.value - 1) * limit;
     const response = await fetch(
-      `https://pokeapi.co/api/v2/pokemon?offset=${offsetValue}&limit=${limit}`
+      "https://pokeapi.co/api/v2/pokemon?limit=10000"
     );
     if (!response.ok) {
-      throw new Error("Failed to load Pokémon");
+      throw new Error("Failed to load Pokémon list");
     }
     const data = await response.json();
-    const pokemonPromises = data.results.map((pokemon) =>
-      fetch(pokemon.url).then((res) => res.json())
-    );
-    pokemonList.value = await Promise.all(pokemonPromises);
+    allPokemonList.value = data.results; // Store all Pokémon names and URLs
   } catch (err) {
     error.value = err.message;
   } finally {
@@ -141,21 +137,66 @@ const fetchPokemonList = async () => {
   }
 };
 
-const searchPokemon = () => {
-  if (searchTerm.value.trim()) {
-    fetchPokemonList();
+// Fetch Pokémon details by URL
+const fetchPokemonDetails = async (url) => {
+  const response = await fetch(url);
+  return response.json();
+};
+
+const loadPokemonList = async (showLoader = true) => {
+  if (showLoader) {
+    loading.value = true; // Show loader only if explicitly asked
+  }
+  error.value = null;
+  pokemonList.value = [];
+  try {
+    const offsetValue = (currentIndex.value - 1) * limit;
+    const pokemonToFetch = filteredPokemonList.value.slice(
+      offsetValue,
+      offsetValue + limit
+    );
+    const pokemonPromises = pokemonToFetch.map((pokemon) =>
+      fetchPokemonDetails(pokemon.url)
+    );
+    pokemonList.value = await Promise.all(pokemonPromises);
+  } catch (err) {
+    error.value = err.message;
+  } finally {
+    if (showLoader) {
+      loading.value = false; // Hide loader if shown
+    }
   }
 };
 
+// Computed property to filter the Pokémon list based on the search term
+const filteredPokemonList = computed(() => {
+  if (!searchTerm.value) {
+    return allPokemonList.value;
+  }
+  return allPokemonList.value.filter((pokemon) =>
+    pokemon.name.toLowerCase().includes(searchTerm.value.toLowerCase())
+  );
+});
+
+// Paginate the filtered list
+const paginatedPokemonList = computed(() => {
+  return pokemonList.value;
+});
+
+// Search Pokémon as the user types
+const searchPokemon = () => {
+  currentIndex.value = 1; // Reset to first page of filtered results
+  loadPokemonList();
+};
 const nextPage = () => {
   currentIndex.value += 1;
-  fetchPokemonList();
+  loadPokemonList();
 };
 
 const previousPage = () => {
   if (currentIndex.value > 1) {
     currentIndex.value -= 1;
-    fetchPokemonList();
+    loadPokemonList();
   }
 };
 
@@ -209,7 +250,8 @@ const getTypeColor = (type) => {
   return typeColours[type] || "rgba(255, 255, 255, 0.2)"; // Default to white if type is not found
 };
 
-onMounted(() => {
-  fetchPokemonList(); // Load the first 9 Pokémon on mount
+onMounted(async () => {
+  await fetchAllPokemon(); // Load all Pokémon names and URLs on mount
+  loadPokemonList(); // Load the first set of Pokémon based on pagination
 });
 </script>
