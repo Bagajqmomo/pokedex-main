@@ -37,6 +37,7 @@
           v-for="pokemon in paginatedPokemonList"
           :key="pokemon.id"
           class="pokedex__card"
+          @click="openPokemonCard(pokemon)"
           :style="{
             borderColor: getColor(pokemon.types[0].type.name),
             background: `radial-gradient(80% 80% at 50% bottom, ${getTypeColor(
@@ -76,6 +77,7 @@
       <button @click="nextPage">></button>
     </div>
   </div>
+  <Popup v-model="pokemonCard" :data="selectedPokemon" />
 </template>
 
 <script setup>
@@ -86,6 +88,8 @@ useHead({
 import { ref, onMounted, computed } from "vue";
 import { register } from "swiper/element/bundle";
 
+const pokemonCard = ref(false);
+const selectedPokemon = ref(null); // To store the clicked Pokémon's data
 const allPokemonList = ref([]); // Store all Pokémon names and URLs
 const pokemonList = ref([]); // Store the current page's Pokémon details
 const searchTerm = ref("");
@@ -117,6 +121,11 @@ const elementImages = [
   "/images/element/fairy.svg",
 ];
 
+const openPokemonCard = (pokemon) => {
+  selectedPokemon.value = pokemon;
+  pokemonCard.value = true;
+};
+
 // Fetch basic info for all Pokémon
 const fetchAllPokemon = async () => {
   loading.value = true;
@@ -143,10 +152,8 @@ const fetchPokemonDetails = async (url) => {
   return response.json();
 };
 
-const loadPokemonList = async (showLoader = true) => {
-  if (showLoader) {
-    loading.value = true; // Show loader only if explicitly asked
-  }
+const loadPokemonList = async () => {
+  loading.value = true; // Show loader only if explicitly asked
   error.value = null;
   pokemonList.value = [];
   try {
@@ -162,9 +169,7 @@ const loadPokemonList = async (showLoader = true) => {
   } catch (err) {
     error.value = err.message;
   } finally {
-    if (showLoader) {
-      loading.value = false; // Hide loader if shown
-    }
+    loading.value = false; // Hide loader if shown
   }
 };
 
@@ -249,6 +254,12 @@ const getColor = (type) => {
 const getTypeColor = (type) => {
   return typeColours[type] || "rgba(255, 255, 255, 0.2)"; // Default to white if type is not found
 };
+
+watch(searchTerm, (newVal) => {
+  if (!newVal.trim()) {
+    loadPokemonList(); // Reset to default list when search term is cleared
+  }
+});
 
 onMounted(async () => {
   await fetchAllPokemon(); // Load all Pokémon names and URLs on mount
