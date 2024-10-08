@@ -66,6 +66,7 @@
     background-color: rgba(250, 250, 250, 0.1);
     border-radius: 0.75rem;
     box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.4);
+    cursor: pointer;
     @include transition;
 
     &:hover {
@@ -108,5 +109,10 @@
         height: px_rem(16);
       }
     }
+  }
+
+  &__evo {
+    display: flex;
+    gap: px_rem(16);
   }
 }

@@ -77,7 +77,11 @@
       <button @click="nextPage">></button>
     </div>
   </div>
-  <Popup v-model="pokemonCard" :data="selectedPokemon" />
+  <Popup
+    v-model="pokemonCard"
+    :data="selectedPokemon"
+    :evoData="evolutionChain"
+  />
 </template>
 
 <script setup>
@@ -90,6 +94,7 @@ import { register } from "swiper/element/bundle";
 
 const pokemonCard = ref(false);
 const selectedPokemon = ref(null); // To store the clicked Pokémon's data
+const evolutionChain = ref(null);
 const allPokemonList = ref([]); // Store all Pokémon names and URLs
 const pokemonList = ref([]); // Store the current page's Pokémon details
 const searchTerm = ref("");
@@ -120,10 +125,69 @@ const elementImages = [
   "/images/element/dark.svg",
   "/images/element/fairy.svg",
 ];
-
-const openPokemonCard = (pokemon) => {
+const openPokemonCard = async (pokemon) => {
   selectedPokemon.value = pokemon;
   pokemonCard.value = true;
+
+  // Fetch Pokémon species data to get the evolution chain URL
+  const speciesResponse = await fetch(
+    `https://pokeapi.co/api/v2/pokemon-species/${pokemon.id}/`
+  );
+  const speciesData = await speciesResponse.json();
+
+  const evolutionChainUrl = speciesData.evolution_chain.url;
+
+  getEvolutionChain(evolutionChainUrl);
+};
+
+const getEvolutionChain = async (url) => {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error("Failed to load Evolution Chain");
+    }
+    const data = await response.json();
+    evolutionChain.value = parseEvolutionChain(data.chain); // Pass the evolution chain data
+  } catch (err) {
+    error.value = err.message;
+  } finally {
+    loading.value = false;
+  }
+};
+
+const parseEvolutionChain = (chain) => {
+  const chainInfo = [];
+
+  function traverseEvolution(evolution) {
+    const speciesName = evolution.species.name;
+    const speciesUrl = evolution.species.url; // To get Pokémon image, we need to fetch from this URL
+    const pokemonId = getPokemonIdFromUrl(speciesUrl);
+
+    const minLevel =
+      evolution.evolution_details.length > 0
+        ? evolution.evolution_details[0].min_level
+        : null;
+
+    chainInfo.push({
+      name: speciesName,
+      url: speciesUrl,
+      minLevel,
+      id: pokemonId,
+    });
+
+    if (evolution.evolves_to.length > 0) {
+      evolution.evolves_to.forEach((evo) => traverseEvolution(evo));
+    }
+  }
+
+  traverseEvolution(chain);
+
+  return chainInfo;
+};
+
+const getPokemonIdFromUrl = (url) => {
+  const parts = url.split("/"); // Split the URL by "/"
+  return parts[parts.length - 2]; // Get the second last part which is the ID
 };
 
 // Fetch basic info for all Pokémon
@@ -203,56 +267,6 @@ const previousPage = () => {
     currentIndex.value -= 1;
     loadPokemonList();
   }
-};
-
-const colours = {
-  normal: "rgba(168, 167, 122, 0.2)", // #A8A77A
-  fire: "rgba(238, 129, 48, 0.2)", // #EE8130
-  water: "rgba(99, 144, 240, 0.2)", // #6390F0
-  electric: "rgba(247, 208, 44, 0.2)", // #F7D02C
-  grass: "rgba(122, 199, 76, 0.2)", // #7AC74C
-  ice: "rgba(150, 217, 214, 0.2)", // #96D9D6
-  fighting: "rgba(194, 46, 40, 0.2)", // #C22E28
-  poison: "rgba(163, 62, 161, 0.2)", // #A33EA1
-  ground: "rgba(226, 191, 101, 0.2)", // #E2BF65
-  flying: "rgba(169, 143, 243, 0.2)", // #A98FF3
-  psychic: "rgba(249, 85, 135, 0.2)", // #F95587
-  bug: "rgba(166, 185, 26, 0.2)", // #A6B91A
-  rock: "rgba(182, 161, 54, 0.2)", // #B6A136
-  ghost: "rgba(115, 87, 151, 0.2)", // #735797
-  dragon: "rgba(111, 53, 252, 0.2)", // #6F35FC
-  dark: "rgba(112, 87, 70, 0.2)", // #705746
-  steel: "rgba(183, 183, 206, 0.2)", // #B7B7CE
-  fairy: "rgba(214, 133, 173, 0.2)", // #D685AD
-};
-
-const typeColours = {
-  normal: "#A8A77A",
-  fire: "#EE8130",
-  water: "#6390F0",
-  electric: "#F7D02C",
-  grass: "#7AC74C",
-  ice: "#96D9D6",
-  fighting: "#C22E28",
-  poison: "#A33EA1",
-  ground: "#E2BF65",
-  flying: "#A98FF3",
-  psychic: "#F95587",
-  bug: "#A6B91A",
-  rock: "#B6A136",
-  ghost: "#735797",
-  dragon: "#6F35FC",
-  dark: "#705746",
-  steel: "#B7B7CE",
-  fairy: "#D685AD",
-};
-
-const getColor = (type) => {
-  return colours[type] || "rgba(255, 255, 255, 0.2)"; // Default to white if type is not found
-};
-
-const getTypeColor = (type) => {
-  return typeColours[type] || "rgba(255, 255, 255, 0.2)"; // Default to white if type is not found
 };
 
 watch(searchTerm, (newVal) => {
