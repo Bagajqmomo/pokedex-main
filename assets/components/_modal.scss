@@ -34,6 +34,105 @@
     &:focus {
       outline: none;
     }
+
+    .pokedex {
+      &__img {
+        width: 250px;
+        margin-top: -150px;
+      }
+
+      &__type {
+        margin-block: unset;
+        li {
+          width: unset;
+
+          img {
+            width: 32px;
+            height: auto;
+          }
+        }
+      }
+
+      &__info {
+        @include flex(center, center);
+        gap: px_rem(16);
+        width: 100%;
+        border-top: 1px solid #fff;
+        border-bottom: 1px solid #fff;
+        margin-block: px_rem(16) px_rem(32);
+        padding-block: px_rem(8);
+
+        p {
+          @include flex(center, center);
+          gap: px_rem(8);
+          font-size: px_rem(18);
+          font-weight: 700;
+          line-height: px_rem(24);
+
+          &:first-of-type {
+            padding-right: px_rem(16);
+            border-right: 1px solid #fff;
+          }
+
+          &:last-of-type {
+            padding-left: px_rem(16);
+            border-left: 1px solid #fff;
+          }
+
+          img {
+            width: px_rem(24);
+          }
+        }
+      }
+
+      &__stat {
+        display: flex;
+        flex-direction: column;
+        gap: px_rem(8);
+        width: 100%;
+        margin-bottom: px_rem(32);
+
+        h3 {
+          font-size: px_rem(16);
+          font-weight: 700;
+          margin-bottom: px_rem(8);
+        }
+
+        > div {
+          display: grid;
+          grid-template-columns: 10% 90%;
+          gap: px_rem(8);
+          font-size: px_rem(14);
+          font-weight: 700;
+        }
+      }
+
+      &__chain {
+        width: 100%;
+        h3 {
+          font-size: px_rem(16);
+          font-weight: 700;
+          margin-bottom: px_rem(8);
+        }
+      }
+
+      &__evo {
+        @include flex(space-between, center);
+
+        span {
+          font-size: px_rem(14);
+          font-weight: 700;
+          background-color: #f5f5f5;
+          color: #000;
+          padding: px_rem(8);
+          border-radius: 30px;
+        }
+
+        img {
+          width: 80px;
+        }
+      }
+    }
   }
 
   &__close {
