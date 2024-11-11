@@ -12,14 +12,11 @@
         >
           <swiper-slide
             class="element__slide"
-            v-for="(element, index) in elements"
+            v-for="(image, index) in elementImages"
             :key="index"
-            @click="toggleElementFilter(element.type)"
-            :class="{
-              'element__slide--active': selectedElements.includes(element.type),
-            }"
+            @click="filterByElement(elementTypes[index])"
           >
-            <img :src="element.image" :alt="element.type" />
+            <img :src="image" :alt="'Slide ' + (index + 1)" />
           </swiper-slide>
         </swiper-container>
       </client-only>
@@ -94,7 +91,6 @@ useHead({
   title: "Pokédex - Gotta Catch 'Em All",
 });
 
-import { ref, onMounted, computed } from "vue";
 import { register } from "swiper/element/bundle";
 
 const pokemonCard = ref(false);
@@ -108,43 +104,78 @@ const error = ref(null);
 const currentIndex = ref(1); // Start with Pokémon index 1
 const limit = 15; // Number of Pokémon to show per page
 const isLoading = ref(false);
-const selectedElements = ref([]);
+const selectElement = ref(null);
 
 register(); //swiper
 
-const elements = [
-  { type: "normal", image: "/images/element/normal.svg" },
-  { type: "fighting", image: "/images/element/fighting.svg" },
-  { type: "flying", image: "/images/element/flying.svg" },
-  { type: "poison", image: "/images/element/poison.svg" },
-  { type: "ground", image: "/images/element/ground.svg" },
-  { type: "rock", image: "/images/element/rock.svg" },
-  { type: "bug", image: "/images/element/bug.svg" },
-  { type: "ghost", image: "/images/element/ghost.svg" },
-  { type: "steel", image: "/images/element/steel.svg" },
-  { type: "fire", image: "/images/element/fire.svg" },
-  { type: "water", image: "/images/element/water.svg" },
-  { type: "grass", image: "/images/element/grass.svg" },
-  { type: "electric", image: "/images/element/electric.svg" },
-  { type: "psychic", image: "/images/element/psychic.svg" },
-  { type: "ice", image: "/images/element/ice.svg" },
-  { type: "dragon", image: "/images/element/dragon.svg" },
-  { type: "dark", image: "/images/element/dark.svg" },
-  { type: "fairy", image: "/images/element/fairy.svg" },
+const elementImages = [
+  "/images/element/normal.svg",
+  "/images/element/fighting.svg",
+  "/images/element/flying.svg",
+  "/images/element/poison.svg",
+  "/images/element/ground.svg",
+  "/images/element/rock.svg",
+  "/images/element/bug.svg",
+  "/images/element/ghost.svg",
+  "/images/element/steel.svg",
+  "/images/element/fire.svg",
+  "/images/element/water.svg",
+  "/images/element/grass.svg",
+  "/images/element/electric.svg",
+  "/images/element/psychic.svg",
+  "/images/element/ice.svg",
+  "/images/element/dragon.svg",
+  "/images/element/dark.svg",
+  "/images/element/fairy.svg",
 ];
 
-// Toggle element filter function
-const toggleElementFilter = (elementType) => {
-  const index = selectedElements.value.indexOf(elementType);
-  if (index === -1) {
-    selectedElements.value.push(elementType);
-  } else {
-    selectedElements.value.splice(index, 1);
-  }
-  currentIndex.value = 1; // Reset to first page when filter changes
-  loadPokemonList();
-};
+const elementTypes = [
+  "normal",
+  "fighting",
+  "flying",
+  "poison",
+  "ground",
+  "rock",
+  "bug",
+  "ghost",
+  "steel",
+  "fire",
+  "water",
+  "grass",
+  "electric",
+  "psychic",
+  "ice",
+  "dragon",
+  "dark",
+  "fairy",
+];
 
+// Function to handle element icon click
+const filterByElement = async (element) => {
+  selectElement.value = element; // Set selected element
+
+  loading.value = true; // Start loading
+  error.value = null; // Clear any previous errors
+
+  try {
+    // Fetch Pokémon of the selected element type from the API
+    const response = await fetch(`https://pokeapi.co/api/v2/type/${element}/`);
+    if (!response.ok) {
+      throw new Error("Failed to load Pokémon by type");
+    }
+
+    const data = await response.json();
+    const filteredPokemon = data.pokemon.map((p) => p.pokemon); // Extract Pokémon details
+
+    allPokemonList.value = filteredPokemon; // Update the list with filtered Pokémon
+    currentIndex.value = 1; // Reset to the first page
+    loadPokemonList(); // Load the first page of the filtered list
+  } catch (err) {
+    error.value = err.message; // Display error message
+  } finally {
+    loading.value = false; // Hide loader
+  }
+};
 const openPokemonCard = async (pokemon) => {
   selectedPokemon.value = pokemon;
   pokemonCard.value = true;
@@ -235,86 +266,35 @@ const fetchPokemonDetails = async (url) => {
   return response.json();
 };
 
-// Modify the loadPokemonList function to handle element filtering
 const loadPokemonList = async () => {
-  loading.value = true;
+  loading.value = true; // Show loader only if explicitly asked
   error.value = null;
   pokemonList.value = [];
-
   try {
     const offsetValue = (currentIndex.value - 1) * limit;
     const pokemonToFetch = filteredPokemonList.value.slice(
       offsetValue,
-      offsetValue + limit * 2 // Fetch more Pokemon to account for filtering
+      offsetValue + limit
     );
-
-    const fetchedPokemon = await Promise.all(
-      pokemonToFetch.map((pokemon) => fetchPokemonDetails(pokemon.url))
+    const pokemonPromises = pokemonToFetch.map((pokemon) =>
+      fetchPokemonDetails(pokemon.url)
     );
-
-    // Apply element type filtering after fetching the details
-    let filteredPokemon = fetchedPokemon;
-    if (selectedElements.value.length > 0) {
-      filteredPokemon = fetchedPokemon.filter((pokemon) =>
-        pokemon.types.some((type) =>
-          selectedElements.value.includes(type.type.name)
-        )
-      );
-    }
-
-    // Take only the number of Pokemon we need for the current page
-    pokemonList.value = filteredPokemon.slice(0, limit);
-
-    // If we don't have enough Pokemon after filtering, fetch more
-    if (
-      pokemonList.value.length < limit &&
-      offsetValue + limit * 2 < filteredPokemonList.value.length
-    ) {
-      const nextBatch = await loadMorePokemon(offsetValue + limit * 2);
-      pokemonList.value = [...pokemonList.value, ...nextBatch].slice(0, limit);
-    }
+    pokemonList.value = await Promise.all(pokemonPromises);
   } catch (err) {
     error.value = err.message;
   } finally {
-    loading.value = false;
+    loading.value = false; // Hide loader if shown
   }
 };
 
-// Helper function to load more Pokemon if needed
-const loadMorePokemon = async (offset) => {
-  const nextPokemonBatch = filteredPokemonList.value.slice(
-    offset,
-    offset + limit
-  );
-  const morePokemon = await Promise.all(
-    nextPokemonBatch.map((pokemon) => fetchPokemonDetails(pokemon.url))
-  );
-  return morePokemon.filter(
-    (pokemon) =>
-      selectedElements.value.length === 0 ||
-      pokemon.types.some((type) =>
-        selectedElements.value.includes(type.type.name)
-      )
-  );
-};
-
-// Watch for changes in selected elements
-watch(selectedElements, () => {
-  loadPokemonList();
-});
-
-// Modified filtered Pokemon list computed property
+// Computed property to filter the Pokémon list based on the search term
 const filteredPokemonList = computed(() => {
-  let filtered = allPokemonList.value;
-
-  // Apply name search filter
-  if (searchTerm.value) {
-    filtered = filtered.filter((pokemon) =>
-      pokemon.name.toLowerCase().includes(searchTerm.value.toLowerCase())
-    );
+  if (!searchTerm.value) {
+    return allPokemonList.value;
   }
-
-  return filtered;
+  return allPokemonList.value.filter((pokemon) =>
+    pokemon.name.toLowerCase().includes(searchTerm.value.toLowerCase())
+  );
 });
 
 // Paginate the filtered list
