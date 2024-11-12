@@ -1,0 +1,6 @@
+@use "../fowards.scss" as *;
+
+footer {
+  min-height: 60px;
+  @include flex(center, center);
+}

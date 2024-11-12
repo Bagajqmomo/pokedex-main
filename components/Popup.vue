@@ -1,6 +1,5 @@
 <template>
   <DialogRoot v-model:open="open">
-    <DialogTrigger class="Button grass"> Edit profile </DialogTrigger>
     <DialogPortal>
       <DialogOverlay class="modal__overlay" />
       <DialogContent
@@ -106,7 +105,3 @@ const props = defineProps({
 
 const open = defineModel();
 </script>
-
-<style>
-/* Add your styles here */
-</style>

@@ -82,7 +82,7 @@
     v-model="pokemonCard"
     :data="selectedPokemon"
     :evoData="evolutionChain"
-    :loading="isLoading"
+    :loading="loadingEvolution"
   />
 </template>
 
@@ -103,9 +103,9 @@ const loading = ref(false);
 const error = ref(null);
 const currentIndex = ref(1); // Start with Pokémon index 1
 const limit = 15; // Number of Pokémon to show per page
-const isLoading = ref(false);
-const selectElement = ref(null);
 
+const selectElement = ref(null);
+const loadingEvolution = ref(false); // Separate loading state for evolution chain images
 register(); //swiper
 
 const elementImages = [
@@ -150,6 +150,18 @@ const elementTypes = [
   "fairy",
 ];
 
+const waitForImages = async (imageUrls) => {
+  const imagePromises = imageUrls.map((url) => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.src = url;
+      img.onload = resolve; // Resolve when image loads
+      img.onerror = resolve; // Resolve even if image fails to load
+    });
+  });
+  await Promise.all(imagePromises); // Wait for all images to load
+};
+
 // Function to handle element icon click
 const filterByElement = async (element) => {
   selectElement.value = element; // Set selected element
@@ -176,11 +188,12 @@ const filterByElement = async (element) => {
     loading.value = false; // Hide loader
   }
 };
+
 const openPokemonCard = async (pokemon) => {
   selectedPokemon.value = pokemon;
   pokemonCard.value = true;
-  isLoading.value = true;
-  // Fetch Pokémon species data to get the evolution chain URL
+  loadingEvolution.value = true;
+
   const speciesResponse = await fetch(
     `https://pokeapi.co/api/v2/pokemon-species/${pokemon.id}/`
   );
@@ -188,22 +201,29 @@ const openPokemonCard = async (pokemon) => {
 
   const evolutionChainUrl = speciesData.evolution_chain.url;
 
-  getEvolutionChain(evolutionChainUrl);
-  isLoading.value = false;
+  await getEvolutionChain(evolutionChainUrl);
+  loadingEvolution.value = false;
 };
 
 const getEvolutionChain = async (url) => {
-  loading.value = true;
+  loadingEvolution.value = true;
   try {
     const response = await fetch(url);
     if (!response.ok) throw new Error("Failed to load Evolution Chain");
 
     const data = await response.json();
     evolutionChain.value = parseEvolutionChain(data.chain);
+
+    // Collect image URLs for the evolution chain and wait for them to load
+    const evolutionImageUrls = evolutionChain.value.map(
+      (evo) =>
+        `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${evo.id}.png`
+    );
+    await waitForImages(evolutionImageUrls);
   } catch (err) {
     error.value = err.message;
   } finally {
-    loading.value = false;
+    loadingEvolution.value = false; // Finish evolution image loading
   }
 };
 
@@ -223,7 +243,7 @@ const parseEvolutionChain = (chain) => {
       name: speciesName,
       url: speciesUrl,
       minLevel,
-      id: pokemonId,
+      id: pokemonId, // Keep id to construct image URL
     });
 
     if (evolution.evolves_to.length > 0) {
@@ -267,7 +287,7 @@ const fetchPokemonDetails = async (url) => {
 };
 
 const loadPokemonList = async () => {
-  loading.value = true; // Show loader only if explicitly asked
+  loading.value = true; // Show loader
   error.value = null;
   pokemonList.value = [];
   try {
@@ -276,14 +296,23 @@ const loadPokemonList = async () => {
       offsetValue,
       offsetValue + limit
     );
+
     const pokemonPromises = pokemonToFetch.map((pokemon) =>
       fetchPokemonDetails(pokemon.url)
     );
     pokemonList.value = await Promise.all(pokemonPromises);
+
+    // Get image URLs from fetched Pokémon data
+    const pokemonImageUrls = pokemonList.value.map(
+      (pokemon) => pokemon.sprites.other?.["official-artwork"]?.front_default
+    );
+
+    // Wait for all images to load before hiding the loader
+    await waitForImages(pokemonImageUrls);
   } catch (err) {
     error.value = err.message;
   } finally {
-    loading.value = false; // Hide loader if shown
+    loading.value = false; // Hide loader only after images have loaded
   }
 };
 

@@ -7,8 +7,7 @@
     </main>
 
     <footer>
-      <!-- Your footer content goes here -->
-      <p>&copy; 2024 Your Company</p>
+      <p>&copy; Made by CY</p>
     </footer>
   </div>
 </template>
