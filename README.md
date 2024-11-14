@@ -1,3 +1,10 @@
+Pokédex
+This is a Pokédex project built with Vue and styled using SCSS, designed to provide information on various Pokémon. The site includes interactive filtering by type, a search feature, and detailed Pokémon profiles with evolution chains. Images and data load dynamically to ensure a smooth browsing experience.
+
+Explore and discover your favorite Pokémon!
+
+https://pokedex-one-rosy-10.vercel.app/
+
 # Nuxt 3 Minimal Starter
 
 Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
