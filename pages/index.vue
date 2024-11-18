@@ -32,10 +32,17 @@
 
     <div class="pokedex__content">
       <Loader v-if="loading" />
-      <div v-else-if="error">{{ error }}</div>
+      <div v-else-if="error"><Error /></div>
       <div class="pokedex__container" v-else>
         <div
+          v-if="!filteredPokemonList.length && !loading"
+          class="pokedex__empty"
+        >
+          No Pokémon found. Try a different search!
+        </div>
+        <div
           v-for="pokemon in paginatedPokemonList"
+          v-else
           :key="pokemon.id"
           class="pokedex__card"
           @click="openPokemonCard(pokemon)"

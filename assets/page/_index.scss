@@ -65,6 +65,11 @@
     gap: px_rem(72) px_rem(32);
   }
 
+  &__empty {
+    @include flex(center, center);
+    min-height: 400px;
+  }
+
   &__card {
     display: flex;
     flex-direction: column;
